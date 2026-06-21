@@ -89,7 +89,7 @@
 
         const rate = data.rates.JPY;
 
-        rateElement.textContent = rate.toFixed(3);
+        rateElement.textContent = rate.toFixed(2);
         rateElement.classList.remove("loading", "error");
       } catch (error) {
         console.error(error);
