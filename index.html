@@ -3,24 +3,132 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>USD/JPY Monitor</title>
+  <title>FX Monitor - USD/JPY</title>
+
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      background: #000;
-      overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    :root {
+      --bg: #05070a;
+      --panel: #0b1018;
+      --border: #1c2633;
+      --text: #f4f7fb;
+      --muted: #8a96a8;
+      --accent: #2f8cff;
     }
 
-    .app {
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      padding:
+        env(safe-area-inset-top)
+        env(safe-area-inset-right)
+        env(safe-area-inset-bottom)
+        env(safe-area-inset-left);
+    }
+
+    .monitor {
       width: 100vw;
       height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--bg);
+    }
+
+    .left,
+    .right {
+      min-width: 0;
+      min-height: 0;
+      padding: 14px;
+    }
+
+    .left {
+      border-right: 1px solid var(--border);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px;
+      background:
+        radial-gradient(circle at top left, rgba(47, 140, 255, 0.18), transparent 36%),
+        var(--panel);
+    }
+
+    .right {
       background: #000;
+    }
+
+    .label {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .pair {
+      font-size: 64px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      line-height: 1;
+    }
+
+    .rateBox {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 0;
+    }
+
+    .rate {
+      font-size: clamp(120px, 16vw, 230px);
+      font-weight: 900;
+      line-height: 0.92;
+      letter-spacing: -0.07em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sub {
+      margin-top: 28px;
+      font-size: 36px;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 20px;
+      color: var(--muted);
+      font-size: 24px;
+    }
+
+    .status {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .widgetPanel {
+      width: 100%;
+      height: 100%;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #000;
+      border: 1px solid var(--border);
     }
 
     .tradingview-widget-container,
@@ -28,37 +136,129 @@
       width: 100%;
       height: 100%;
     }
+
+    @media (orientation: portrait) {
+      .monitor {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
+
+      .left {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .rate {
+        font-size: clamp(88px, 22vw, 160px);
+      }
+    }
   </style>
 </head>
+
 <body>
-  <main class="app">
-    <div class="tradingview-widget-container">
-      <div class="tradingview-widget-container__widget"></div>
-      <script
-        type="text/javascript"
-        src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js"
-        async>
-        {
-          "autosize": true,
-          "symbol": "FX:USDJPY",
-          "interval": "5",
-          "timezone": "Asia/Tokyo",
-          "theme": "dark",
-          "style": "1",
-          "locale": "ja",
-          "backgroundColor": "#000000",
-          "gridColor": "rgba(255, 255, 255, 0.06)",
-          "hide_top_toolbar": false,
-          "hide_side_toolbar": true,
-          "allow_symbol_change": false,
-          "calendar": false,
-          "withdateranges": false,
-          "details": false,
-          "hotlist": false,
-          "support_host": "https://www.tradingview.com"
-        }
-      </script>
-    </div>
+  <main class="monitor">
+    <section class="left">
+      <div>
+        <div class="label">FX MONITOR</div>
+        <div class="pair">USD/JPY</div>
+      </div>
+
+      <div class="rateBox">
+        <div id="rate" class="rate">---.---</div>
+        <div id="change" class="sub">Loading market data...</div>
+      </div>
+
+      <div class="footer">
+        <div id="updated">--:--:--</div>
+        <div class="status">LIVE</div>
+      </div>
+    </section>
+
+    <section class="right">
+      <div class="widgetPanel">
+        <div class="tradingview-widget-container">
+          <div class="tradingview-widget-container__widget"></div>
+          <script
+            type="text/javascript"
+            src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js"
+            async>
+            {
+              "autosize": true,
+              "symbol": "FX:USDJPY",
+              "interval": "5",
+              "timezone": "Asia/Tokyo",
+              "theme": "dark",
+              "style": "1",
+              "locale": "ja",
+              "hide_top_toolbar": false,
+              "hide_side_toolbar": true,
+              "allow_symbol_change": false,
+              "calendar": false,
+              "support_host": "https://www.tradingview.com"
+            }
+          </script>
+        </div>
+      </div>
+    </section>
   </main>
+
+  <script>
+    const rateElement = document.getElementById("rate");
+    const changeElement = document.getElementById("change");
+    const updatedElement = document.getElementById("updated");
+
+    let previousRate = null;
+
+    async function fetchRate() {
+      try {
+        const url = "https://query1.finance.yahoo.com/v8/finance/chart/JPY=X?range=1d&interval=1m";
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch rate");
+        }
+
+        const data = await response.json();
+        const result = data.chart.result[0];
+        const meta = result.meta;
+
+        const rate = meta.regularMarketPrice;
+        const previousClose = meta.previousClose;
+
+        if (typeof rate !== "number") {
+          throw new Error("Invalid rate");
+        }
+
+        rateElement.textContent = rate.toFixed(3);
+
+        if (typeof previousClose === "number") {
+          const diff = rate - previousClose;
+          const percent = (diff / previousClose) * 100;
+          const sign = diff >= 0 ? "+" : "";
+          changeElement.textContent =
+            `${sign}${diff.toFixed(3)} / ${sign}${percent.toFixed(2)}%`;
+        } else if (previousRate !== null) {
+          const diff = rate - previousRate;
+          const sign = diff >= 0 ? "+" : "";
+          changeElement.textContent = `${sign}${diff.toFixed(3)} from last update`;
+        } else {
+          changeElement.textContent = "USD/JPY spot rate";
+        }
+
+        previousRate = rate;
+
+        const now = new Date();
+        updatedElement.textContent =
+          `Updated ${now.toLocaleTimeString("ja-JP")}`;
+      } catch (error) {
+        changeElement.textContent = "Rate fetch failed";
+        updatedElement.textContent = "Check connection or API";
+        console.error(error);
+      }
+    }
+
+    fetchRate();
+    setInterval(fetchRate, 30 * 1000);
+  </script>
 </body>
 </html>
