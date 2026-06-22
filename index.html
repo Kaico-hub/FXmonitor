@@ -76,8 +76,8 @@
   <script>
     const rateElement = document.getElementById("rate");
     const RATE_API_URL = "https://api.coinbase.com/v2/exchange-rates?currency=USD";
-    const POLL_INTERVAL_MS = 1 * 1000;
-    const FETCH_TIMEOUT_MS = 5 * 1000;
+    const POLL_INTERVAL_MS = 10 * 1000;
+    const FETCH_TIMEOUT_MS = 10 * 1000;
     let wakeLock = null;
     let hasDisplayedRate = false;
 
