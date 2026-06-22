@@ -42,6 +42,12 @@
       background: #000;
     }
 
+    .display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
     .rate {
       font-size: clamp(120px, 25vw, 210px);
       font-weight: 900;
@@ -65,16 +71,38 @@
     .rate.stale {
       color: #f59e0b;
     }
+
+    .updated-at {
+      margin-top: 20px;
+      color: rgba(255, 255, 255, 0.35);
+      font-size: clamp(12px, 2.5vw, 20px);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
   </style>
 </head>
 
 <body>
   <main class="screen">
-    <div id="rate" class="rate loading">---.---</div>
+    <div class="display">
+      <div id="rate" class="rate loading">---.---</div>
+      <div id="updated-at" class="updated-at" aria-live="off"></div>
+    </div>
   </main>
 
   <script>
     const rateElement = document.getElementById("rate");
+    const updatedAtElement = document.getElementById("updated-at");
+    const updatedAtFormatter = new Intl.DateTimeFormat("ja-JP", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false
+    });
     const RATE_API_URL = "https://api.coinbase.com/v2/exchange-rates?currency=USD";
     const POLL_INTERVAL_MS = 10 * 1000;
     const FETCH_TIMEOUT_MS = 10 * 1000;
@@ -115,6 +143,7 @@
         }
 
         rateElement.textContent = rate.toFixed(3);
+        updatedAtElement.textContent = `最終取得 ${updatedAtFormatter.format(new Date())}`;
         rateElement.classList.remove("loading", "error", "stale");
         hasDisplayedRate = true;
       } catch (error) {
