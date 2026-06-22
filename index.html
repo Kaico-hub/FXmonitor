@@ -114,7 +114,7 @@
           throw new Error("Invalid API data");
         }
 
-        rateElement.textContent = rate.toFixed(2);
+        rateElement.textContent = rate.toFixed(3);
         rateElement.classList.remove("loading", "error", "stale");
         hasDisplayedRate = true;
       } catch (error) {
